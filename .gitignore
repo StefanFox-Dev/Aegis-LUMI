@@ -1,3 +1,19 @@
 /aegis
 /aegis.exe
 /aegis.json
+
+# Gradle
+.gradle/
+build/
+**/build/
+**/.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db

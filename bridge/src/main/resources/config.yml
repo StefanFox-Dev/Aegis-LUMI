@@ -1,0 +1,22 @@
+# Aegis-LUMI Bridge Configuration
+
+connection:
+  host: "127.0.0.1"
+  port: 19140
+  retry-interval-ticks: 100
+
+punishments:
+  enabled: false
+  ban-duration-seconds: 1209600 # 14 days (0 for permanent)
+
+alerts:
+  enabled-by-default: true
+  cooldown-milliseconds: 1000
+  log: true
+
+telemetry:
+  input-budget-nanos: 1500000
+  sample-budget-nanos: 1000000
+  sample-interval-ticks: 5
+  max-samples-per-tick: 8
+  max-tracked-targets: 128

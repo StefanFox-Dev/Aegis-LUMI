@@ -1,0 +1,21 @@
+name: "Aegis-LUMI"
+version: "1.0.0"
+main: "aegis.lumi.AegisLumiPlugin"
+api: ["1.0.0"]
+author: "StefanFox-Dev"
+description: "High-performance Aegis Anticheat bridge for Lumi Bedrock servers"
+commands:
+  aegis:
+    description: "Aegis Anticheat management and status command"
+    permission: "aegis.command"
+    usage: "/aegis [status|alerts [on|off]|reload]"
+permissions:
+  aegis.command:
+    description: "Allows using the /aegis management command"
+    default: op
+  aegis.alerts:
+    description: "Allows receiving cheat detection alerts"
+    default: op
+  aegis.bypass:
+    description: "Bypasses all Aegis checks and punishments"
+    default: false
