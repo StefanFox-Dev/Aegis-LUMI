@@ -15,6 +15,10 @@ import aegis.lumi.session.SessionRegistry;
 import aegis.lumi.telemetry.PacketObserver;
 import aegis.lumi.telemetry.WorldSampler;
 import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginCommand;
+import cn.nukkit.command.PluginIdentifiableCommand;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.TaskHandler;
 
@@ -32,6 +36,7 @@ public final class AegisLumiPlugin extends PluginBase {
     private WorldSampler worldSampler;
     private PlayerSessionListener sessionListener;
     private PacketObserver packetObserver;
+    private AegisCommand aegisCommand;
     private TaskHandler tickTaskHandler;
 
     public static AegisLumiPlugin getInstance() {
@@ -67,7 +72,13 @@ public final class AegisLumiPlugin extends PluginBase {
         getServer().getEventBus().subscribe(packetObserver);
 
         // Register command
-        getServer().getCommandMap().register("aegis", new AegisCommand(this, aegisConfig, connection, sessionRegistry));
+        this.aegisCommand = new AegisCommand(this, aegisConfig, connection, sessionRegistry);
+        PluginIdentifiableCommand existing = getServer().getPluginCommand("aegis");
+        if (existing instanceof PluginCommand<?> pluginCmd) {
+            ((PluginCommand) pluginCmd).setExecutor(aegisCommand);
+        } else {
+            getServer().getCommandMap().register("aegis", aegisCommand);
+        }
 
         // Register any already online players
         for (Player player : getServer().getOnlinePlayers().values()) {
@@ -166,5 +177,13 @@ public final class AegisLumiPlugin extends PluginBase {
 
     public DetectionService getDetectionService() {
         return detectionService;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (aegisCommand != null && command.getName().equalsIgnoreCase("aegis")) {
+            return aegisCommand.execute(sender, label, args);
+        }
+        return false;
     }
 }

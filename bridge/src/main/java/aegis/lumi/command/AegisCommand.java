@@ -8,9 +8,10 @@ import aegis.lumi.session.SessionRegistry;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandExecutor;
 import cn.nukkit.command.CommandSender;
 
-public final class AegisCommand extends Command {
+public final class AegisCommand extends Command implements CommandExecutor {
 
     private final AegisLumiPlugin plugin;
     private final AegisConfig config;
@@ -109,5 +110,10 @@ public final class AegisCommand extends Command {
         sender.sendMessage("§e/aegis alerts [on|off] §7- Toggle anticheat detection notifications");
         sender.sendMessage("§e/aegis reload §7- Reload configuration from disk");
         sender.sendMessage("§8---------------------------");
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        return execute(sender, label, args);
     }
 }
