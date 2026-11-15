@@ -10,6 +10,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.entity.Attribute;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.effect.Effect;
 import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.level.Level;
@@ -80,14 +81,23 @@ public final class WorldSampler {
             flags |= StateFlag.FLYING;
         }
 
+        boolean spinAttack = player.getDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_SPIN_ATTACK);
         boolean special = player.isGliding()
                 || player.isSwimming()
                 || player.isInsideOfWater()
                 || player.riding != null
                 || player.isOnLadder()
                 || player.isSleeping()
+                || spinAttack
                 || player.getEffects().containsKey(EffectType.LEVITATION)
                 || player.getEffects().containsKey(EffectType.SLOW_FALLING);
+
+        if (player.isGliding()) flags |= StateFlag.GLIDING;
+        if (player.riding != null) flags |= StateFlag.RIDING;
+        if (spinAttack) flags |= StateFlag.SPIN_ATTACK;
+        if (player.isUsingItem()) flags |= StateFlag.USING_ITEM;
+        if (player.isOnLadder()) flags |= StateFlag.ON_LADDER;
+        if (player.isInsideOfWater() || player.isSwimming()) flags |= StateFlag.IN_LIQUID;
 
         if (Server.getInstance().getTicksPerSecond() < 18.0f || player.getPing() > 350) {
             flags |= StateFlag.LAGGING;
@@ -116,6 +126,10 @@ public final class WorldSampler {
             boolean hasGround = false;
             boolean hasCeiling = false;
             boolean obstructed = false;
+            boolean inLiquid = false;
+            boolean onLadder = false;
+            boolean onIce = false;
+            boolean insideSolid = false;
 
             for (int x = minX; x <= maxX; x++) {
                 for (int z = minZ; z <= maxZ; z++) {
@@ -131,14 +145,22 @@ public final class WorldSampler {
                             continue;
                         }
 
-                        if (block instanceof BlockLiquid
-                                || block instanceof BlockLadder
-                                || block instanceof BlockVine
-                                || block instanceof BlockCobweb
+                        if (block instanceof BlockLiquid || block instanceof BlockBubbleColumn) {
+                            inLiquid = true;
+                            special = true;
+                        }
+                        if (block instanceof BlockLadder || block instanceof BlockVine) {
+                            onLadder = true;
+                            special = true;
+                        }
+                        if (block instanceof BlockIce || block instanceof BlockIcePacked || block instanceof BlockBlueIce || block instanceof BlockIceFrosted) {
+                            onIce = true;
+                            special = true;
+                        }
+                        if (block instanceof BlockCobweb
                                 || block instanceof BlockSlime
                                 || block instanceof BlockScaffolding
                                 || block instanceof BlockHoneyBlock
-                                || block instanceof BlockBubbleColumn
                                 || block instanceof BlockPowderSnow
                                 || block.getFrictionFactor() > 0.65f) {
                             special = true;
@@ -166,6 +188,17 @@ public final class WorldSampler {
                                 && (blockBox.getMaxZ() > box.getMinZ() && blockBox.getMinZ() < box.getMaxZ())) {
                             obstructed = true;
                         }
+
+                        // Inside full opaque solid block check (contracted player box for zero false positives)
+                        if (block.isSolid() && !block.isTransparent()
+                                && (blockBox.getMaxX() - blockBox.getMinX()) >= 0.99
+                                && (blockBox.getMaxY() - blockBox.getMinY()) >= 0.99
+                                && (blockBox.getMaxZ() - blockBox.getMinZ()) >= 0.99
+                                && blockBox.getMaxX() > box.getMinX() + 0.16 && blockBox.getMinX() < box.getMaxX() - 0.16
+                                && blockBox.getMaxY() > box.getMinY() + 0.20 && blockBox.getMinY() < box.getMaxY() - 0.20
+                                && blockBox.getMaxZ() > box.getMinZ() + 0.16 && blockBox.getMinZ() < box.getMaxZ() - 0.16) {
+                            insideSolid = true;
+                        }
                     }
                 }
             }
@@ -178,6 +211,18 @@ public final class WorldSampler {
             }
             if (obstructed) {
                 flags |= StateFlag.OBSTRUCTED;
+            }
+            if (inLiquid) {
+                flags |= StateFlag.IN_LIQUID;
+            }
+            if (onLadder) {
+                flags |= StateFlag.ON_LADDER;
+            }
+            if (onIce) {
+                flags |= StateFlag.ON_ICE;
+            }
+            if (insideSolid) {
+                flags |= StateFlag.INSIDE_SOLID;
             }
         }
 

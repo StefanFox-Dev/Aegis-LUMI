@@ -60,10 +60,30 @@ public final class PlayerSessionListener implements Listener {
         }
 
         LoginChainData chain = player.getLoginChainData();
-        String xuid = chain != null ? chain.getXUID() : "";
-        String version = chain != null ? chain.getGameVersion() : "";
+        String xuid = chain != null && chain.getXUID() != null ? chain.getXUID() : "";
+        String version = chain != null && chain.getGameVersion() != null ? chain.getGameVersion() : "";
         int deviceOS = chain != null ? chain.getDeviceOS() : 0;
         int inputMode = chain != null ? chain.getCurrentInputMode() : 0;
+        int defaultInputMode = chain != null ? chain.getDefaultInputMode() : 0;
+        int uiProfile = chain != null ? chain.getUIProfile() : 0;
+        int guiScale = chain != null ? chain.getGuiScale() : 0;
+        String deviceModel = chain != null && chain.getDeviceModel() != null ? chain.getDeviceModel() : "";
+        String deviceId = chain != null && chain.getDeviceId() != null ? chain.getDeviceId() : "";
+        long clientRandomId = chain != null ? chain.getClientId() : 0L;
+        String titleId = chain != null && chain.getTitleId() != null ? chain.getTitleId() : "";
+        String languageCode = chain != null && chain.getLanguageCode() != null ? chain.getLanguageCode() : "";
+        String serverAddress = chain != null && chain.getServerAddress() != null ? chain.getServerAddress() : "";
+        boolean xboxAuthed = chain != null && chain.isXboxAuthed();
+
+        String platformOnlineId = "";
+        String platformOfflineId = "";
+        String playFabId = "";
+        if (chain != null && chain.getRawData() != null) {
+            var raw = chain.getRawData();
+            if (raw.has("PlatformOnlineId")) platformOnlineId = raw.get("PlatformOnlineId").getAsString();
+            if (raw.has("PlatformOfflineId")) platformOfflineId = raw.get("PlatformOfflineId").getAsString();
+            if (raw.has("PlayFabId")) playFabId = raw.get("PlayFabId").getAsString();
+        }
 
         byte[] frame = FrameWriter.join(
                 player.getId(),
@@ -72,7 +92,21 @@ public final class PlayerSessionListener implements Listener {
                 player.protocol,
                 version,
                 deviceOS,
-                inputMode
+                inputMode,
+                defaultInputMode,
+                uiProfile,
+                guiScale,
+                deviceModel,
+                deviceId,
+                clientRandomId,
+                titleId,
+                languageCode,
+                serverAddress,
+                xboxAuthed,
+                platformOnlineId,
+                platformOfflineId,
+                playFabId,
+                0
         );
         connection.send(frame);
     }

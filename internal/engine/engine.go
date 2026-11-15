@@ -104,6 +104,15 @@ func (e *Engine) Handle(t wire.Type, body []byte) error {
 				}
 			}
 			p.ControlsKnown = in.Control&wire.ControlKnown != 0
+			p.HasExtendedInput = in.HasExtended
+			p.ControlExt = in.ControlExt
+			p.Delta = in.Delta
+			p.AnalogMove = in.AnalogMove
+			p.RawMove = in.RawMove
+			p.InteractRot = in.InteractRot
+			p.CameraOrient = in.CameraOrient
+			p.PlayMode = in.PlayMode
+			p.InteractionModel = in.InteractionModel
 			p.Serverbound(&packet.PlayerAuthInput{Tick: in.Tick, Position: in.Position, Pitch: in.Pitch, Yaw: in.Yaw, HeadYaw: in.HeadYaw, InputMode: in.Mode, InputData: flags}, in.Time)
 		}
 	case wire.TypeAttack:
@@ -129,6 +138,30 @@ func (e *Engine) Handle(t wire.Type, body []byte) error {
 		}
 		if p := e.players[in.Session]; p != nil {
 			p.Serverbound(&packet.Animate{ActionType: packet.AnimateActionSwingArm}, in.Time)
+		}
+	case wire.TypeUseItem:
+		in, err := wire.DecodeUseItem(body)
+		if err != nil {
+			return err
+		}
+		if p := e.players[in.Session]; p != nil {
+			p.Action(in, in.Time)
+		}
+	case wire.TypeSlotChange:
+		in, err := wire.DecodeSlotChange(body)
+		if err != nil {
+			return err
+		}
+		if p := e.players[in.Session]; p != nil {
+			p.Action(in, in.Time)
+		}
+	case wire.TypeInventoryAction:
+		in, err := wire.DecodeInventoryAction(body)
+		if err != nil {
+			return err
+		}
+		if p := e.players[in.Session]; p != nil {
+			p.Action(in, in.Time)
 		}
 	case wire.TypeObservation:
 		u, err := wire.DecodeObservation(body)

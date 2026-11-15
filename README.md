@@ -40,7 +40,7 @@ High-performance, zero-overhead Bedrock Anticheat Bridge for **Lumi** (Cloudburs
 
 ## 📦 Project Structure
 
-- `bridge/`: Nukkit / Lumi plugin source code (Java 21).
+- `bridge/`: Nukkit / Lumi plugin source code (Java 25).
   - `aegis.lumi.AegisLumiPlugin`: Main lifecycle and tick dispatch.
   - `aegis.lumi.config`: Configuration models.
   - `aegis.lumi.network`: Framing, buffer pool, stateful connection.

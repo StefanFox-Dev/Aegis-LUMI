@@ -35,19 +35,33 @@ type Config struct {
 
 func Default() Config {
 	return Config{
-		Listen: "0.0.0.0:19140",
+		Listen: "127.0.0.1:19140",
 		Checks: map[string]Check{
-			"Timer_A":       {Enabled: true, Max: 10, Action: "ban"},
+			"Timer_A":       {Enabled: true, Max: 10, Action: "kick"},
 			"Autoclicker_A": {Enabled: true, Max: 10, Action: "kick"},
 			"BadPacket_A":   {Enabled: true, Max: 1, Action: "kick"},
-			"Reach_A":       {Enabled: true, Max: 10, Action: "ban"},
-			"KillAura_A":    {Enabled: true, Max: 10, Action: "ban"},
+			"Reach_A":       {Enabled: true, Max: 10, Action: "kick"},
+			"KillAura_A":    {Enabled: true, Max: 10, Action: "kick"},
 			"Speed_A":       {Enabled: true, Max: 10, Action: "kick"},
 			"Fly_A":         {Enabled: true, Max: 10, Action: "kick"},
 			"KillAura_B":    {Enabled: true, Max: 10, Action: "none"},
 			"AutoCrit_A":    {Enabled: true, Max: 10, Action: "none"},
 			"Velocity_A":    {Enabled: true, Max: 10, Action: "none"},
 			"NoJumpDelay_A": {Enabled: true, Max: 10, Action: "none"},
+			"NoClip_A":      {Enabled: true, Max: 10, Action: "none"},
+			"Jesus_A":       {Enabled: true, Max: 10, Action: "none"},
+			"FastLadder_A":  {Enabled: true, Max: 10, Action: "none"},
+			"Step_A":        {Enabled: true, Max: 10, Action: "none"},
+			"NoSlow_A":      {Enabled: true, Max: 10, Action: "none"},
+			"Elytra_A":      {Enabled: true, Max: 10, Action: "none"},
+			"Blink_A":       {Enabled: true, Max: 10, Action: "none"},
+			"LoginSpoof_A":  {Enabled: true, Max: 6, Action: "none"},
+			"InputSpoof_A":  {Enabled: true, Max: 10, Action: "none"},
+			"FastThrow_A":   {Enabled: true, Max: 6, Action: "kick"},
+			"ItemDelay_A":   {Enabled: true, Max: 10, Action: "none"},
+			"AutoRefill_A":  {Enabled: true, Max: 8, Action: "none"},
+			"Macro_A":       {Enabled: true, Max: 8, Action: "none"},
+			"MLSpoof_A":     {Enabled: true, Max: 8, Action: "none"},
 		},
 	}
 }

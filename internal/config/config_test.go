@@ -8,7 +8,7 @@ import (
 
 func TestDefaultPunishments(t *testing.T) {
 	for name, want := range map[string]wire.Action{
-		"Reach_A": wire.ActionBan, "KillAura_A": wire.ActionBan, "Timer_A": wire.ActionBan,
+		"Reach_A": wire.ActionKick, "KillAura_A": wire.ActionKick, "Timer_A": wire.ActionKick,
 		"Fly_A": wire.ActionKick, "Speed_A": wire.ActionKick,
 		"BadPacket_A": wire.ActionKick, "Autoclicker_A": wire.ActionKick,
 	} {

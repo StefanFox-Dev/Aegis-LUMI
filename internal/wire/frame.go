@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-const Version uint16 = 2
+const Version uint16 = 3
 
 const MaxFrameSize = 8 << 20
 
@@ -24,9 +24,12 @@ const (
 	TypeObservation Type = 0x07
 	TypeState       Type = 0x08
 	TypeInput       Type = 0x09
-	TypeAttack      Type = 0x0a
-	TypeSwing       Type = 0x0b
-	TypeAnimation   Type = 0x0c
+	TypeAttack          Type = 0x0a
+	TypeSwing           Type = 0x0b
+	TypeAnimation       Type = 0x0c
+	TypeUseItem         Type = 0x0d
+	TypeSlotChange      Type = 0x0e
+	TypeInventoryAction Type = 0x0f
 
 	TypeWelcome Type = 0x81
 	TypeFlag    Type = 0x82
@@ -48,13 +51,28 @@ type Hello struct {
 }
 
 type Join struct {
-	Session   uint64
-	Name      string
-	XUID      string
-	Protocol  uint32
-	Version   string
-	DeviceOS  int32
-	InputMode uint32
+	Session           uint64
+	Name              string
+	XUID              string
+	Protocol          uint32
+	Version           string
+	DeviceOS          int32
+	InputMode         uint32
+	DefaultInputMode  uint32
+	UIProfile         int32
+	GuiScale          int32
+	DeviceModel       string
+	DeviceId          string
+	ClientRandomId    int64
+	TitleId           string
+	LanguageCode      string
+	ServerAddress     string
+	XboxAuthed        bool
+	PlatformOnlineId  string
+	PlatformOfflineId string
+	PlayFabId         string
+	AuthType          int32
+	HasExtended       bool
 }
 
 type Quit struct {
@@ -240,6 +258,26 @@ func (m Join) Encode() []byte {
 		w.String(m.Version)
 		w.U32(uint32(m.DeviceOS))
 		w.U32(m.InputMode)
+		if m.HasExtended || m.DeviceModel != "" || m.DeviceId != "" || m.TitleId != "" || m.ClientRandomId != 0 || m.XboxAuthed || m.DefaultInputMode != 0 || m.UIProfile != 0 || m.GuiScale != 0 || m.LanguageCode != "" || m.ServerAddress != "" || m.PlatformOnlineId != "" || m.PlatformOfflineId != "" || m.PlayFabId != "" || m.AuthType != 0 {
+			w.U32(m.DefaultInputMode)
+			w.U32(uint32(m.UIProfile))
+			w.U32(uint32(m.GuiScale))
+			w.String(m.DeviceModel)
+			w.String(m.DeviceId)
+			w.U64(uint64(m.ClientRandomId))
+			w.String(m.TitleId)
+			w.String(m.LanguageCode)
+			w.String(m.ServerAddress)
+			if m.XboxAuthed {
+				w.U8(1)
+			} else {
+				w.U8(0)
+			}
+			w.String(m.PlatformOnlineId)
+			w.String(m.PlatformOfflineId)
+			w.String(m.PlayFabId)
+			w.U32(uint32(m.AuthType))
+		}
 	})
 }
 
@@ -295,6 +333,23 @@ func DecodeHello(b []byte) (Hello, error) {
 func DecodeJoin(b []byte) (Join, error) {
 	r := NewReader(b)
 	m := Join{Session: r.U64(), Name: r.String(), XUID: r.String(), Protocol: r.U32(), Version: r.String(), DeviceOS: int32(r.U32()), InputMode: r.U32()}
+	if r.err == nil && r.off < len(r.buf) {
+		m.HasExtended = true
+		m.DefaultInputMode = r.U32()
+		m.UIProfile = int32(r.U32())
+		m.GuiScale = int32(r.U32())
+		m.DeviceModel = r.String()
+		m.DeviceId = r.String()
+		m.ClientRandomId = int64(r.U64())
+		m.TitleId = r.String()
+		m.LanguageCode = r.String()
+		m.ServerAddress = r.String()
+		m.XboxAuthed = r.U8() != 0
+		m.PlatformOnlineId = r.String()
+		m.PlatformOfflineId = r.String()
+		m.PlayFabId = r.String()
+		m.AuthType = int32(r.U32())
+	}
 	return m, r.Err()
 }
 

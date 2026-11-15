@@ -19,11 +19,29 @@ var factories = map[string]factory{
 	AutoCritA:    func(s config.Check) player.Check { return newJumpCheck(AutoCritA, s, true) },
 	VelocityA:    func(s config.Check) player.Check { return newVelocity(s) },
 	NoJumpDelayA: func(s config.Check) player.Check { return newJumpCheck(NoJumpDelayA, s, false) },
+	NoClipA:      func(s config.Check) player.Check { return newNoClip(s) },
+	JesusA:       func(s config.Check) player.Check { return newJesus(s) },
+	FastLadderA:  func(s config.Check) player.Check { return newFastLadder(s) },
+	StepA:        func(s config.Check) player.Check { return newStep(s) },
+	NoSlowA:      func(s config.Check) player.Check { return newNoSlow(s) },
+	ElytraA:      func(s config.Check) player.Check { return newElytra(s) },
+	BlinkA:       func(s config.Check) player.Check { return newBlink(s) },
+	LoginSpoofA:  func(s config.Check) player.Check { return newLoginSpoof(s) },
+	InputSpoofA:  func(s config.Check) player.Check { return newInputSpoof(s) },
+	FastThrowA:   func(s config.Check) player.Check { return newFastThrow(s) },
+	ItemDelayA:   func(s config.Check) player.Check { return newItemDelay(s) },
+	AutoRefillA:  func(s config.Check) player.Check { return newAutoRefill(s) },
+	MacroA:       func(s config.Check) player.Check { return newMacroCheck(s) },
+	MLSpoofA:     func(s config.Check) player.Check { return newMLSpoof(s) },
 }
 
 func Build(cfg config.Config) []player.Check {
 	checks := make([]player.Check, 0, len(factories))
-	for _, name := range []string{TimerA, AutoclickerA, BadPacketA, ReachA, KillAuraA, SpeedA, FlyA, KillAuraB, AutoCritA, VelocityA, NoJumpDelayA} {
+	for _, name := range []string{
+		TimerA, AutoclickerA, BadPacketA, ReachA, KillAuraA, SpeedA, FlyA, KillAuraB,
+		AutoCritA, VelocityA, NoJumpDelayA, NoClipA, JesusA, FastLadderA, StepA, NoSlowA,
+		ElytraA, BlinkA, LoginSpoofA, InputSpoofA, FastThrowA, ItemDelayA, AutoRefillA, MacroA, MLSpoofA,
+	} {
 		settings := cfg.Check(name)
 		if settings.Enabled {
 			checks = append(checks, factories[name](settings))

@@ -1,17 +1,31 @@
 {
-	"listen": "0.0.0.0:19140",
+	"listen": "127.0.0.1:19140",
 	"debug": false,
 	"checks": {
 		"Autoclicker_A": {"enabled": true, "max": 10, "action": "kick"},
 		"BadPacket_A": {"enabled": true, "max": 1, "action": "kick"},
-		"Timer_A": {"enabled": true, "max": 10, "action": "ban"},
-		"Reach_A": {"enabled": true, "max": 10, "action": "ban"},
-		"KillAura_A": {"enabled": true, "max": 10, "action": "ban"},
+		"Timer_A": {"enabled": true, "max": 10, "action": "kick"},
+		"Reach_A": {"enabled": true, "max": 10, "action": "kick"},
+		"KillAura_A": {"enabled": true, "max": 10, "action": "kick"},
 		"Speed_A": {"enabled": true, "max": 10, "action": "kick"},
 		"Fly_A": {"enabled": true, "max": 10, "action": "kick"},
 		"KillAura_B": {"enabled": true, "max": 10, "action": "none"},
 		"AutoCrit_A": {"enabled": true, "max": 10, "action": "none"},
 		"Velocity_A": {"enabled": true, "max": 10, "action": "none"},
-		"NoJumpDelay_A": {"enabled": true, "max": 10, "action": "none"}
+		"NoJumpDelay_A": {"enabled": true, "max": 10, "action": "none"},
+		"NoClip_A": {"enabled": true, "max": 10, "action": "none"},
+		"Jesus_A": {"enabled": true, "max": 10, "action": "none"},
+		"FastLadder_A": {"enabled": true, "max": 10, "action": "none"},
+		"Step_A": {"enabled": true, "max": 10, "action": "none"},
+		"NoSlow_A": {"enabled": true, "max": 10, "action": "none"},
+		"Elytra_A": {"enabled": true, "max": 10, "action": "none"},
+		"Blink_A": {"enabled": true, "max": 10, "action": "none"},
+		"LoginSpoof_A": {"enabled": true, "max": 6, "action": "none"},
+		"InputSpoof_A": {"enabled": true, "max": 10, "action": "none"},
+		"FastThrow_A": {"enabled": true, "max": 6, "action": "kick"},
+		"ItemDelay_A": {"enabled": true, "max": 10, "action": "none"},
+		"AutoRefill_A": {"enabled": true, "max": 8, "action": "none"},
+		"Macro_A": {"enabled": true, "max": 8, "action": "none"},
+		"MLSpoof_A": {"enabled": true, "max": 8, "action": "none"}
 	}
 }

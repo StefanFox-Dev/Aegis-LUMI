@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public final class FrameWriter {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     private FrameWriter() {}
 
@@ -19,12 +19,30 @@ public final class FrameWriter {
         return wrap(FrameType.HELLO, buf.array());
     }
 
-    public static byte[] join(long session, String name, String xuid, int protocol, String version, int deviceOS, int inputMode) {
+    public static byte[] join(long session, String name, String xuid, int protocol, String version, int deviceOS, int inputMode,
+                              int defaultInputMode, int uiProfile, int guiScale, String deviceModel, String deviceId,
+                              long clientRandomId, String titleId, String languageCode, String serverAddress,
+                              boolean xboxAuthed, String platformOnlineId, String platformOfflineId, String playFabId, int authType) {
         byte[] nameBytes = toBytes(name);
         byte[] xuidBytes = toBytes(xuid);
         byte[] versionBytes = toBytes(version);
+        byte[] modelBytes = toBytes(deviceModel);
+        byte[] deviceIdBytes = toBytes(deviceId);
+        byte[] titleIdBytes = toBytes(titleId);
+        byte[] langBytes = toBytes(languageCode);
+        byte[] addrBytes = toBytes(serverAddress);
+        byte[] pOnlineBytes = toBytes(platformOnlineId);
+        byte[] pOfflineBytes = toBytes(platformOfflineId);
+        byte[] playFabBytes = toBytes(playFabId);
 
-        int bodyLength = 8 + (2 + nameBytes.length) + (2 + xuidBytes.length) + 4 + (2 + versionBytes.length) + 4 + 4;
+        int bodyLength = 8 + (2 + nameBytes.length) + (2 + xuidBytes.length) + 4 + (2 + versionBytes.length) + 4 + 4
+                + 4 + 4 + 4
+                + (2 + modelBytes.length) + (2 + deviceIdBytes.length)
+                + 8
+                + (2 + titleIdBytes.length) + (2 + langBytes.length) + (2 + addrBytes.length)
+                + 1
+                + (2 + pOnlineBytes.length) + (2 + pOfflineBytes.length) + (2 + playFabBytes.length)
+                + 4;
         ByteBuffer buf = allocate(bodyLength);
 
         buf.putLong(session);
@@ -34,6 +52,20 @@ public final class FrameWriter {
         putString(buf, versionBytes);
         buf.putInt(deviceOS);
         buf.putInt(inputMode);
+        buf.putInt(defaultInputMode);
+        buf.putInt(uiProfile);
+        buf.putInt(guiScale);
+        putString(buf, modelBytes);
+        putString(buf, deviceIdBytes);
+        buf.putLong(clientRandomId);
+        putString(buf, titleIdBytes);
+        putString(buf, langBytes);
+        putString(buf, addrBytes);
+        buf.put((byte) (xboxAuthed ? 1 : 0));
+        putString(buf, pOnlineBytes);
+        putString(buf, pOfflineBytes);
+        putString(buf, playFabBytes);
+        buf.putInt(authType);
 
         return wrap(FrameType.JOIN, buf.array());
     }
@@ -54,8 +86,15 @@ public final class FrameWriter {
     public static byte[] input(long session, long time, long tick,
                               float x, float y, float z,
                               float pitch, float yaw, float headYaw,
-                              int mode, boolean missed, int control) {
-        ByteBuffer buf = allocate(8 + 8 + 8 + 4 * 6 + 4 + 1 + 1);
+                              int mode, boolean missed, int control,
+                              int controlExt,
+                              float dx, float dy, float dz,
+                              float analogX, float analogY,
+                              float rawX, float rawY,
+                              float interactX, float interactY,
+                              float camX, float camY, float camZ,
+                              int playMode, int interactionModel) {
+        ByteBuffer buf = allocate(8 + 8 + 8 + 4 * 6 + 4 + 1 + 1 + 2 + 4 * 12 + 4 + 4);
         buf.putLong(session);
         buf.putLong(time);
         buf.putLong(tick);
@@ -68,7 +107,56 @@ public final class FrameWriter {
         buf.putInt(mode);
         buf.put((byte) (missed ? 1 : 0));
         buf.put((byte) (control & 0xFF));
+        buf.putShort((short) (controlExt & 0xFFFF));
+        buf.putFloat(dx);
+        buf.putFloat(dy);
+        buf.putFloat(dz);
+        buf.putFloat(analogX);
+        buf.putFloat(analogY);
+        buf.putFloat(rawX);
+        buf.putFloat(rawY);
+        buf.putFloat(interactX);
+        buf.putFloat(interactY);
+        buf.putFloat(camX);
+        buf.putFloat(camY);
+        buf.putFloat(camZ);
+        buf.putInt(playMode);
+        buf.putInt(interactionModel);
         return wrap(FrameType.INPUT, buf.array());
+    }
+
+    public static byte[] useItem(long session, long time, long tick, int actionType, int slot, int itemId, int flags) {
+        ByteBuffer buf = allocate(8 + 8 + 8 + 1 + 4 + 4 + 1);
+        buf.putLong(session);
+        buf.putLong(time);
+        buf.putLong(tick);
+        buf.put((byte) (actionType & 0xFF));
+        buf.putInt(slot);
+        buf.putInt(itemId);
+        buf.put((byte) (flags & 0xFF));
+        return wrap(FrameType.USE_ITEM, buf.array());
+    }
+
+    public static byte[] slotChange(long session, long time, long tick, int fromSlot, int toSlot) {
+        ByteBuffer buf = allocate(8 + 8 + 8 + 4 + 4);
+        buf.putLong(session);
+        buf.putLong(time);
+        buf.putLong(tick);
+        buf.putInt(fromSlot);
+        buf.putInt(toSlot);
+        return wrap(FrameType.SLOT_CHANGE, buf.array());
+    }
+
+    public static byte[] inventoryAction(long session, long time, long tick, int windowId, int sourceSlot, int destSlot, int kind) {
+        ByteBuffer buf = allocate(8 + 8 + 8 + 4 + 4 + 4 + 1);
+        buf.putLong(session);
+        buf.putLong(time);
+        buf.putLong(tick);
+        buf.putInt(windowId);
+        buf.putInt(sourceSlot);
+        buf.putInt(destSlot);
+        buf.put((byte) (kind & 0xFF));
+        return wrap(FrameType.INVENTORY_ACTION, buf.array());
     }
 
     public static byte[] attack(long session, long time, long target) {

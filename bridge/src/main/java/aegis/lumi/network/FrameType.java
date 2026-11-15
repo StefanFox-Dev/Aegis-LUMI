@@ -16,6 +16,9 @@ public final class FrameType {
     public static final byte ATTACK = 0x0A;
     public static final byte SWING = 0x0B;
     public static final byte ANIMATION = 0x0C;
+    public static final byte USE_ITEM = 0x0D;
+    public static final byte SLOT_CHANGE = 0x0E;
+    public static final byte INVENTORY_ACTION = 0x0F;
 
     public static final byte WELCOME = (byte) 0x81;
     public static final byte FLAG = (byte) 0x82;

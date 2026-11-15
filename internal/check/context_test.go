@@ -51,8 +51,8 @@ func TestCombatLagAndReach(t *testing.T) {
 			if (r.flags[scenario.check] > 0) != scenario.want {
 				t.Fatalf("flags %v", r.flags)
 			}
-			if scenario.want && r.punished[scenario.check] != wire.ActionBan {
-				t.Fatalf("expected ban after persistent combat evidence, got %v", r.punished)
+			if scenario.want && r.punished[scenario.check] != wire.ActionKick {
+				t.Fatalf("expected kick after persistent combat evidence, got %v", r.punished)
 			}
 			if !scenario.want && len(r.punished) != 0 {
 				t.Fatalf("legitimate combat punished: %v", r.punished)

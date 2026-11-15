@@ -4,9 +4,6 @@ import aegis.lumi.config.AegisConfig;
 import aegis.lumi.model.Action;
 import aegis.lumi.model.Detection;
 import cn.nukkit.Player;
-import cn.nukkit.Server;
-
-import java.util.Date;
 
 public final class PunishmentService {
 
@@ -25,13 +22,8 @@ public final class PunishmentService {
             return;
         }
 
-        if (action == Action.KICK) {
+        if (action == Action.KICK || action == Action.BAN) {
             player.kick("§8[§cAegis§8] §cUnfair Advantage: " + detection.name());
-        } else if (action == Action.BAN) {
-            long duration = config.getBanDurationSeconds();
-            Date expiry = duration > 0 ? new Date(System.currentTimeMillis() + duration * 1000L) : null;
-            Server.getInstance().getNameBans().addBan(player.getName(), "Aegis: " + detection.name(), expiry, "Aegis");
-            player.kick("§8[§cAegis§8] §cBanned: " + detection.name());
         }
     }
 }

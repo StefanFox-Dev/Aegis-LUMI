@@ -18,6 +18,14 @@ const (
 	StateCeiling
 	StatePhysics
 	StateObstructed
+	StateInLiquid
+	StateOnLadder
+	StateOnIce
+	StateUsingItem
+	StateGliding
+	StateRiding
+	StateSpinAttack
+	StateInsideSolid
 )
 
 type Observation struct {

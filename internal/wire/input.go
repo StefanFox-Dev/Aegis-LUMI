@@ -11,6 +11,17 @@ const (
 	ControlKnown
 )
 
+const (
+	ControlExtUsingItem uint16 = 1 << iota
+	ControlExtGliding
+	ControlExtSwimming
+	ControlExtSpinAttack
+	ControlExtUp
+	ControlExtDown
+	ControlExtLeft
+	ControlExtRight
+)
+
 type Input struct {
 	Session, Time, Tick uint64
 	Position            [3]float32
@@ -18,6 +29,15 @@ type Input struct {
 	Mode                uint32
 	Missed              bool
 	Control             uint8
+	HasExtended         bool
+	ControlExt          uint16
+	Delta               [3]float32
+	AnalogMove          [2]float32
+	RawMove             [2]float32
+	InteractRot         [2]float32
+	CameraOrient        [3]float32
+	PlayMode            uint32
+	InteractionModel    uint32
 }
 
 func DecodeInput(body []byte) (Input, error) {
@@ -31,6 +51,21 @@ func DecodeInput(body []byte) (Input, error) {
 	m.Missed = r.U8() != 0
 	if r.off < len(r.buf) {
 		m.Control = r.U8()
+	}
+	if r.err == nil && r.off < len(r.buf) {
+		m.HasExtended = true
+		m.ControlExt = r.U16()
+		for i := range m.Delta {
+			m.Delta[i] = r.F32()
+		}
+		m.AnalogMove[0], m.AnalogMove[1] = r.F32(), r.F32()
+		m.RawMove[0], m.RawMove[1] = r.F32(), r.F32()
+		m.InteractRot[0], m.InteractRot[1] = r.F32(), r.F32()
+		for i := range m.CameraOrient {
+			m.CameraOrient[i] = r.F32()
+		}
+		m.PlayMode = r.U32()
+		m.InteractionModel = r.U32()
 	}
 	return m, r.Err()
 }
@@ -52,8 +87,25 @@ func (m Input) Encode() []byte {
 		} else {
 			w.U8(0)
 		}
-		if m.Control != 0 {
+		if m.Control != 0 || m.HasExtended {
 			w.U8(m.Control)
+		}
+		if m.HasExtended {
+			w.U16(m.ControlExt)
+			for _, v := range m.Delta {
+				w.F32(v)
+			}
+			w.F32(m.AnalogMove[0])
+			w.F32(m.AnalogMove[1])
+			w.F32(m.RawMove[0])
+			w.F32(m.RawMove[1])
+			w.F32(m.InteractRot[0])
+			w.F32(m.InteractRot[1])
+			for _, v := range m.CameraOrient {
+				w.F32(v)
+			}
+			w.U32(m.PlayMode)
+			w.U32(m.InteractionModel)
 		}
 	})
 }
