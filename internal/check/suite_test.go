@@ -34,22 +34,6 @@ func TestLoginSpoofDetection(t *testing.T) {
 	}
 }
 
-func TestFastThrowDetection(t *testing.T) {
-	p, r := newPlayer(player.InputModeMouse)
-	for tick := uint64(1); tick <= 12; tick++ {
-		p.Action(wire.UseItem{
-			Session: 1,
-			Time:    1000 + tick*50,
-			Tick:    tick,
-			ItemId:  373,
-			Flags:   wire.UseItemFlagProjectile,
-		}, 1000+tick*50)
-	}
-	if r.flags[FastThrowA] == 0 {
-		t.Fatal("expected FastThrow_A flag for 12 projectiles in 12 ticks")
-	}
-}
-
 func TestInputSpoofWASDOnTouch(t *testing.T) {
 	p, r := newPlayer(player.InputModeTouch)
 	p.HasExtendedInput = true

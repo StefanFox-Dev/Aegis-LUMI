@@ -47,7 +47,6 @@ func Default() Config {
 			"KillAura_B":    {Enabled: true, Max: 10, Action: "none"},
 			"AutoCrit_A":    {Enabled: true, Max: 10, Action: "none"},
 			"Velocity_A":    {Enabled: true, Max: 10, Action: "none"},
-			"NoJumpDelay_A": {Enabled: true, Max: 10, Action: "none"},
 			"NoClip_A":      {Enabled: true, Max: 10, Action: "none"},
 			"Jesus_A":       {Enabled: true, Max: 10, Action: "none"},
 			"FastLadder_A":  {Enabled: true, Max: 10, Action: "none"},
@@ -57,9 +56,6 @@ func Default() Config {
 			"Blink_A":       {Enabled: true, Max: 10, Action: "none"},
 			"LoginSpoof_A":  {Enabled: true, Max: 6, Action: "none"},
 			"InputSpoof_A":  {Enabled: true, Max: 10, Action: "none"},
-			"FastThrow_A":   {Enabled: true, Max: 6, Action: "kick"},
-			"AutoRefill_A":  {Enabled: true, Max: 8, Action: "none"},
-			"Macro_A":       {Enabled: true, Max: 8, Action: "none"},
 			"MLSpoof_A":     {Enabled: true, Max: 8, Action: "none"},
 		},
 	}

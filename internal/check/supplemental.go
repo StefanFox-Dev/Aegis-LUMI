@@ -12,10 +12,9 @@ import (
 )
 
 const (
-	KillAuraB    = "KillAura_B"
-	AutoCritA    = "AutoCrit_A"
-	VelocityA    = "Velocity_A"
-	NoJumpDelayA = "NoJumpDelay_A"
+	KillAuraB = "KillAura_B"
+	AutoCritA = "AutoCrit_A"
+	VelocityA = "Velocity_A"
 )
 
 type aura struct {

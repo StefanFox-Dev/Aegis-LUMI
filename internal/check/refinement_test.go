@@ -303,29 +303,6 @@ func TestLegitimatePacketBatches(t *testing.T) {
 	}
 }
 
-func TestNoJumpDelayReleaseAndContinuous(t *testing.T) {
-	for _, held := range []bool{false, true} {
-		p, r := newPlayer(player.InputModeMouse)
-		p.ControlsKnown = true
-		for tick := uint64(1); tick <= 200; tick++ {
-			at := 10000 + tick*50
-			ready(p, at, true)
-			y := float32(0)
-			if tick%5 == 2 {
-				y = .42
-			}
-			pk := input(tick, 0, y)
-			if held || tick%5 == 2 {
-				pk.InputData.Set(packet.InputFlagJumping)
-			}
-			p.Serverbound(pk, at)
-		}
-		if (r.flags[NoJumpDelayA] > 0) != held {
-			t.Fatal(held, r.flags)
-		}
-	}
-}
-
 func TestMicroCritAndVanillaJump(t *testing.T) {
 	for _, hop := range []float32{.06, .42} {
 		p, r := combatPlayer(2, 0)

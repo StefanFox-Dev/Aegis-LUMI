@@ -20,7 +20,7 @@ func TestDefaultPunishments(t *testing.T) {
 }
 
 func TestNewHeuristicsOnlyReport(t *testing.T) {
-	for _, name := range []string{"KillAura_B", "AutoCrit_A", "Velocity_A", "NoJumpDelay_A"} {
+	for _, name := range []string{"KillAura_B", "AutoCrit_A", "Velocity_A"} {
 		check := Default().Check(name)
 		if !check.Enabled || check.Punishment() != wire.ActionNone {
 			t.Fatalf("%s %+v", name, check)

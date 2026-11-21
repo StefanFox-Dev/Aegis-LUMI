@@ -12,7 +12,6 @@
 		"KillAura_B": {"enabled": true, "max": 10, "action": "none"},
 		"AutoCrit_A": {"enabled": true, "max": 10, "action": "none"},
 		"Velocity_A": {"enabled": true, "max": 10, "action": "none"},
-		"NoJumpDelay_A": {"enabled": true, "max": 10, "action": "none"},
 		"NoClip_A": {"enabled": true, "max": 10, "action": "none"},
 		"Jesus_A": {"enabled": true, "max": 10, "action": "none"},
 		"FastLadder_A": {"enabled": true, "max": 10, "action": "none"},
@@ -22,9 +21,6 @@
 		"Blink_A": {"enabled": true, "max": 10, "action": "none"},
 		"LoginSpoof_A": {"enabled": true, "max": 6, "action": "none"},
 		"InputSpoof_A": {"enabled": true, "max": 10, "action": "none"},
-		"FastThrow_A": {"enabled": true, "max": 6, "action": "kick"},
-		"AutoRefill_A": {"enabled": true, "max": 8, "action": "none"},
-		"Macro_A": {"enabled": true, "max": 8, "action": "none"},
 		"MLSpoof_A": {"enabled": true, "max": 8, "action": "none"}
 	}
 }
