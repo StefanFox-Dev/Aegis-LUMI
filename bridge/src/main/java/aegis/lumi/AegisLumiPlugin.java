@@ -148,9 +148,8 @@ public final class AegisLumiPlugin extends PluginBase {
         connection.tick(currentTick);
 
         if (connection.isConnected()) {
-            if ((currentTick % 20L) == 0L) {
-                connection.send(FrameWriter.tick(currentTick, now));
-            }
+            // Send tick synchronization frame
+            connection.send(FrameWriter.tick(currentTick, now));
 
             // Sample world collisions and state
             worldSampler.tick(currentTick);
