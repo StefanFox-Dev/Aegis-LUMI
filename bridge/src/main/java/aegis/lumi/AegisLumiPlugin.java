@@ -64,8 +64,8 @@ public final class AegisLumiPlugin extends PluginBase {
         this.connection = new AegisConnection(aegisConfig, getLogger(), this::onConnected);
 
         this.worldSampler = new WorldSampler(aegisConfig, connection, sessionRegistry);
-        this.sessionListener = new PlayerSessionListener(aegisConfig, connection, sessionRegistry);
         this.packetObserver = new PacketObserver(aegisConfig, connection, sessionRegistry);
+        this.sessionListener = new PlayerSessionListener(aegisConfig, connection, sessionRegistry, packetObserver);
 
         // Register event listeners directly to Lumi EventBus
         getServer().getEventBus().subscribe(sessionListener);
@@ -122,6 +122,10 @@ public final class AegisLumiPlugin extends PluginBase {
             sessionRegistry.clear();
         }
 
+        if (packetObserver != null) {
+            packetObserver.clear();
+        }
+
         if (eventBus != null) {
             eventBus.clear();
         }
@@ -144,8 +148,9 @@ public final class AegisLumiPlugin extends PluginBase {
         connection.tick(currentTick);
 
         if (connection.isConnected()) {
-            // Send tick synchronization frame
-            connection.send(FrameWriter.tick(currentTick, now));
+            if ((currentTick % 20L) == 0L) {
+                connection.send(FrameWriter.tick(currentTick, now));
+            }
 
             // Sample world collisions and state
             worldSampler.tick(currentTick);

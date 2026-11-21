@@ -13,6 +13,7 @@ public final class PlayerSession {
     private final Map<String, Long> lastAlertTimes = new ConcurrentHashMap<>();
 
     private volatile boolean alertsEnabled;
+    private long lastSampleTick = -1000L;
 
     public PlayerSession(Player player, boolean defaultAlerts) {
         this.id = player.getId();
@@ -50,5 +51,13 @@ public final class PlayerSession {
 
     public int getPing() {
         return player.getPing();
+    }
+
+    public long getLastSampleTick() {
+        return lastSampleTick;
+    }
+
+    public void setLastSampleTick(long lastSampleTick) {
+        this.lastSampleTick = lastSampleTick;
     }
 }

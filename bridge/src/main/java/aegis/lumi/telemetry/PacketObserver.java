@@ -35,6 +35,7 @@ public final class PacketObserver implements Listener {
     private final AegisConnection connection;
     private final SessionRegistry sessions;
     private final TickBudget budget;
+    private final TickBudget blockBudget;
     private final Map<Long, Integer> lastSlots = new ConcurrentHashMap<>();
     private final Map<Long, Long> lastClientTicks = new ConcurrentHashMap<>();
 
@@ -43,11 +44,32 @@ public final class PacketObserver implements Listener {
         this.connection = connection;
         this.sessions = sessions;
         this.budget = new TickBudget(config.getInputBudgetNanos(), 512);
+        this.blockBudget = new TickBudget(0L, 64);
+    }
+
+    public void removeSession(long sessionId) {
+        lastSlots.remove(sessionId);
+        lastClientTicks.remove(sessionId);
+    }
+
+    public void clear() {
+        lastSlots.clear();
+        lastClientTicks.clear();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onReceive(DataPacketReceiveEvent event) {
         if (!connection.isConnected()) {
+            return;
+        }
+
+        DataPacket packet = event.getPacket();
+        if (!(packet instanceof PlayerAuthInputPacket)
+                && !(packet instanceof InventoryTransactionPacket)
+                && !(packet instanceof MobEquipmentPacket)
+                && !(packet instanceof ItemStackRequestPacket)
+                && !(packet instanceof AnimatePacket)
+                && !(packet instanceof LevelSoundEventPacket)) {
             return;
         }
 
@@ -63,7 +85,7 @@ public final class PacketObserver implements Listener {
 
         long start = System.nanoTime();
         try {
-            processReceivedPacket(player, event.getPacket());
+            processReceivedPacket(player, packet);
         } finally {
             budget.record(System.nanoTime() - start);
         }
@@ -247,12 +269,21 @@ public final class PacketObserver implements Listener {
             return;
         }
 
+        DataPacket packet = event.getPacket();
+        if (!(packet instanceof MovePlayerPacket)
+                && !(packet instanceof MoveEntityAbsolutePacket)
+                && !(packet instanceof MoveEntityDeltaPacket)
+                && !(packet instanceof SetEntityMotionPacket)
+                && !(packet instanceof RemoveEntityPacket)
+                && !(packet instanceof UpdateBlockPacket)) {
+            return;
+        }
+
         Player player = event.getPlayer();
         if (player == null) {
             return;
         }
 
-        DataPacket packet = event.getPacket();
         long session = player.getId();
         long now = System.currentTimeMillis();
 
@@ -262,20 +293,19 @@ public final class PacketObserver implements Listener {
                     ? ObservationType.TELEPORT
                     : ObservationType.POSITION;
 
-            float[] box = new float[]{
+            connection.send(FrameWriter.observation(
+                    session, now, move.eid, kind,
                     move.x - 0.3f, move.y, move.z - 0.3f,
                     move.x + 0.3f, move.y + 1.8f, move.z + 0.3f
-            };
-
-            connection.send(FrameWriter.observation(session, now, move.eid, kind, box));
+            ));
 
         } else if (packet instanceof MoveEntityAbsolutePacket moveAbs) {
             int kind = moveAbs.teleport ? ObservationType.TELEPORT : ObservationType.POSITION;
-            float[] box = new float[]{
+            connection.send(FrameWriter.observation(
+                    session, now, moveAbs.eid, kind,
                     (float) moveAbs.x - 0.3f, (float) moveAbs.y, (float) moveAbs.z - 0.3f,
                     (float) moveAbs.x + 0.3f, (float) moveAbs.y + 1.8f, (float) moveAbs.z + 0.3f
-            };
-            connection.send(FrameWriter.observation(session, now, moveAbs.eid, kind, box));
+            ));
 
         } else if (packet instanceof MoveEntityDeltaPacket moveDelta) {
             if (moveDelta.eid != session) {
@@ -290,20 +320,23 @@ public final class PacketObserver implements Listener {
                         float cy = prev[1] + dy;
                         float cz = (prev[2] + prev[5]) * 0.5f + dz;
 
-                        float[] box = new float[]{
-                                cx - 0.3f, cy, cz - 0.3f,
-                                cx + 0.3f, cy + 1.8f, cz + 0.3f
-                        };
-                        ps.getView().getVisible().put(moveDelta.eid, box);
-                        connection.send(FrameWriter.observation(session, now, moveDelta.eid, ObservationType.POSITION, box));
+                        prev[0] = cx - 0.3f;
+                        prev[1] = cy;
+                        prev[2] = cz - 0.3f;
+                        prev[3] = cx + 0.3f;
+                        prev[4] = cy + 1.8f;
+                        prev[5] = cz + 0.3f;
+                        connection.send(FrameWriter.observation(session, now, moveDelta.eid, ObservationType.POSITION, prev));
                     }
                 }
             }
 
         } else if (packet instanceof SetEntityMotionPacket motion) {
             if (motion.eid == session) {
-                float[] box = new float[]{motion.motionX, motion.motionY, motion.motionZ, 0f, 0f, 0f};
-                connection.send(FrameWriter.observation(session, now, session, ObservationType.MOTION, box));
+                connection.send(FrameWriter.observation(
+                        session, now, session, ObservationType.MOTION,
+                        motion.motionX, motion.motionY, motion.motionZ, 0f, 0f, 0f
+                ));
             }
 
         } else if (packet instanceof RemoveEntityPacket remove) {
@@ -317,9 +350,11 @@ public final class PacketObserver implements Listener {
             double dx = player.getX() - block.x;
             double dy = player.getY() - block.y;
             double dz = player.getZ() - block.z;
-            if (dx * dx + dy * dy + dz * dz <= 64.0) {
-                float[] box = new float[]{block.x, block.y, block.z, block.x + 1, block.y + 1, block.z + 1};
-                connection.send(FrameWriter.observation(session, now, 0, ObservationType.BLOCK, box));
+            if (dx * dx + dy * dy + dz * dz <= 64.0 && blockBudget.canClaim(Server.getInstance().getTick())) {
+                connection.send(FrameWriter.observation(
+                        session, now, 0, ObservationType.BLOCK,
+                        block.x, block.y, block.z, block.x + 1, block.y + 1, block.z + 1
+                ));
             }
         }
     }

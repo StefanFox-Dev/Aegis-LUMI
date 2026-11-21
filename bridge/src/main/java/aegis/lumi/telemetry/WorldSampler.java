@@ -14,6 +14,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.effect.Effect;
 import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public final class WorldSampler {
     private final AegisConnection connection;
     private final SessionRegistry sessions;
     private final TickBudget budget;
+    private final List<PlayerSession> sessionScratch = new ArrayList<>();
 
     private int roundRobinIndex = 0;
 
@@ -38,31 +40,44 @@ public final class WorldSampler {
     }
 
     public void tick(long currentTick) {
-        if (!connection.isConnected()) {
+        if (!connection.isConnected() || sessions.size() == 0) {
             return;
         }
 
-        List<PlayerSession> all = new ArrayList<>(sessions.all());
-        if (all.isEmpty()) {
+        sessionScratch.clear();
+        sessionScratch.addAll(sessions.all());
+        int total = sessionScratch.size();
+        if (total == 0) {
             return;
         }
 
-        int count = Math.min(all.size(), config.getMaxSamplesPerTick());
-        long now = System.currentTimeMillis();
+        try {
+            int interval = Math.max(1, config.getSampleIntervalTicks());
+            int maxPerTick = Math.min(total, config.getMaxSamplesPerTick());
+            long now = System.currentTimeMillis();
+            int sampled = 0;
 
-        for (int i = 0; i < count; i++) {
-            if (!budget.canClaim(currentTick)) {
-                break;
-            }
+            for (int scanned = 0; scanned < total && sampled < maxPerTick; scanned++) {
+                int index = Math.floorMod(roundRobinIndex++, total);
+                PlayerSession session = sessionScratch.get(index);
+                if (currentTick - session.getLastSampleTick() < interval) {
+                    continue;
+                }
+                if (!budget.canClaim(currentTick)) {
+                    break;
+                }
 
-            int index = Math.abs(roundRobinIndex++ % all.size());
-            PlayerSession session = all.get(index);
-            long start = System.nanoTime();
-            try {
-                samplePlayer(session.getPlayer(), now);
-            } finally {
-                budget.record(System.nanoTime() - start);
+                long start = System.nanoTime();
+                try {
+                    session.setLastSampleTick(currentTick);
+                    samplePlayer(session.getPlayer(), now);
+                    sampled++;
+                } finally {
+                    budget.record(System.nanoTime() - start);
+                }
             }
+        } finally {
+            sessionScratch.clear();
         }
     }
 
@@ -131,9 +146,20 @@ public final class WorldSampler {
             boolean onIce = false;
             boolean insideSolid = false;
 
+            int lastChunkX = Integer.MIN_VALUE;
+            int lastChunkZ = Integer.MIN_VALUE;
+            FullChunk cachedChunk = null;
+
             for (int x = minX; x <= maxX; x++) {
+                int chunkX = x >> 4;
                 for (int z = minZ; z <= maxZ; z++) {
-                    cn.nukkit.level.format.FullChunk chunk = level.getChunk(x >> 4, z >> 4);
+                    int chunkZ = z >> 4;
+                    if (chunkX != lastChunkX || chunkZ != lastChunkZ) {
+                        lastChunkX = chunkX;
+                        lastChunkZ = chunkZ;
+                        cachedChunk = level.isChunkLoaded(chunkX, chunkZ) ? level.getChunk(chunkX, chunkZ, false) : null;
+                    }
+                    FullChunk chunk = cachedChunk;
                     if (chunk == null) {
                         special = true;
                         continue;

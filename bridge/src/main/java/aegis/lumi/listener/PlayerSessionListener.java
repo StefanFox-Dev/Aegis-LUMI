@@ -5,6 +5,7 @@ import aegis.lumi.network.AegisConnection;
 import aegis.lumi.network.FrameWriter;
 import aegis.lumi.session.PlayerSession;
 import aegis.lumi.session.SessionRegistry;
+import aegis.lumi.telemetry.PacketObserver;
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
@@ -18,11 +19,13 @@ public final class PlayerSessionListener implements Listener {
     private final AegisConfig config;
     private final AegisConnection connection;
     private final SessionRegistry sessions;
+    private final PacketObserver packetObserver;
 
-    public PlayerSessionListener(AegisConfig config, AegisConnection connection, SessionRegistry sessions) {
+    public PlayerSessionListener(AegisConfig config, AegisConnection connection, SessionRegistry sessions, PacketObserver packetObserver) {
         this.config = config;
         this.connection = connection;
         this.sessions = sessions;
+        this.packetObserver = packetObserver;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -47,6 +50,9 @@ public final class PlayerSessionListener implements Listener {
         }
 
         sessions.remove(player.getId());
+        if (packetObserver != null) {
+            packetObserver.removeSession(player.getId());
+        }
 
         if (connection.isConnected()) {
             connection.send(FrameWriter.quit(player.getId()));
