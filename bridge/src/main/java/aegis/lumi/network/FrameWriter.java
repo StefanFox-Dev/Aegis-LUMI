@@ -89,14 +89,6 @@ public final class FrameWriter {
         return out;
     }
 
-    public static byte[] tick(long tick, long time) {
-        byte[] out = allocFrame(FrameType.TICK, 16);
-        int p = 5;
-        p = putLongLE(out, p, tick);
-        putLongLE(out, p, time);
-        return out;
-    }
-
     public static byte[] input(long session, long time, long tick,
                               float x, float y, float z,
                               float pitch, float yaw, float headYaw,

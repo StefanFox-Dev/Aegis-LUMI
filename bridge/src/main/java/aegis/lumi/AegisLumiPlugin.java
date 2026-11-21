@@ -142,15 +142,11 @@ public final class AegisLumiPlugin extends PluginBase {
 
     private void onTick() {
         long currentTick = getServer().getTick();
-        long now = System.currentTimeMillis();
 
         // Tick connection liveness / reconnect
         connection.tick(currentTick);
 
         if (connection.isConnected()) {
-            // Send tick synchronization frame
-            connection.send(FrameWriter.tick(currentTick, now));
-
             // Sample world collisions and state
             worldSampler.tick(currentTick);
         }

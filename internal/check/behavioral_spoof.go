@@ -13,7 +13,6 @@ import (
 const (
 	InputSpoofA = "InputSpoof_A"
 	FastThrowA  = "FastThrow_A"
-	ItemDelayA  = "ItemDelay_A"
 	AutoRefillA = "AutoRefill_A"
 	MacroA      = "Macro_A"
 )
@@ -125,45 +124,6 @@ func (c *fastThrow) OnAction(p *player.Player, action any, at uint64) {
 		c.fail(p, 1, fmt.Sprintf("throws_per_20t=%d item=%d", len(c.throws), u.ItemId))
 	} else if len(c.throws) <= 4 {
 		c.pass(0.02)
-	}
-}
-
-// ItemDelay_A tracks long-window zero-delay item uses after attack/slot change (behavioral signal for ItemDelayFix).
-type itemDelay struct {
-	violations
-	total    int
-	zeroTick int
-	lastFlag uint64
-}
-
-func newItemDelay(s config.Check) *itemDelay {
-	return &itemDelay{violations: newViolations(ItemDelayA, s)}
-}
-func (c *itemDelay) Name() string                                          { return ItemDelayA }
-func (c *itemDelay) OnJoin(_ *player.Player)                               {}
-func (c *itemDelay) Serverbound(_ *player.Player, _ packet.Packet, _ uint64) {}
-func (c *itemDelay) OnAction(p *player.Player, action any, at uint64) {
-	u, ok := action.(wire.UseItem)
-	if !ok || p.State.Flags&wire.StateLagging != 0 {
-		return
-	}
-	nearAttack := p.LastAttackTick > 0 && u.Tick >= p.LastAttackTick && u.Tick-p.LastAttackTick <= 6
-	nearSwitch := p.LastSlotChangeTick > 0 && u.Tick >= p.LastSlotChangeTick && u.Tick-p.LastSlotChangeTick <= 6
-	if !nearAttack && !nearSwitch {
-		return
-	}
-	c.total++
-	if (p.LastAttackTick > 0 && u.Tick-p.LastAttackTick <= 1) || (p.LastSlotChangeTick > 0 && u.Tick-p.LastSlotChangeTick <= 1) {
-		c.zeroTick++
-	}
-	if c.total >= 25 {
-		ratio := float64(c.zeroTick) / float64(c.total)
-		if ratio >= 0.85 && at-c.lastFlag >= 2000 {
-			c.lastFlag = at
-			c.fail(p, 1, fmt.Sprintf("zero_delay_ratio=%.2f samples=%d", ratio, c.total))
-		}
-		c.total = 0
-		c.zeroTick = 0
 	}
 }
 

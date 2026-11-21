@@ -29,7 +29,6 @@ var factories = map[string]factory{
 	LoginSpoofA:  func(s config.Check) player.Check { return newLoginSpoof(s) },
 	InputSpoofA:  func(s config.Check) player.Check { return newInputSpoof(s) },
 	FastThrowA:   func(s config.Check) player.Check { return newFastThrow(s) },
-	ItemDelayA:   func(s config.Check) player.Check { return newItemDelay(s) },
 	AutoRefillA:  func(s config.Check) player.Check { return newAutoRefill(s) },
 	MacroA:       func(s config.Check) player.Check { return newMacroCheck(s) },
 	MLSpoofA:     func(s config.Check) player.Check { return newMLSpoof(s) },
@@ -40,7 +39,7 @@ func Build(cfg config.Config) []player.Check {
 	for _, name := range []string{
 		TimerA, AutoclickerA, BadPacketA, ReachA, KillAuraA, SpeedA, FlyA, KillAuraB,
 		AutoCritA, VelocityA, NoJumpDelayA, NoClipA, JesusA, FastLadderA, StepA, NoSlowA,
-		ElytraA, BlinkA, LoginSpoofA, InputSpoofA, FastThrowA, ItemDelayA, AutoRefillA, MacroA, MLSpoofA,
+		ElytraA, BlinkA, LoginSpoofA, InputSpoofA, FastThrowA, AutoRefillA, MacroA, MLSpoofA,
 	} {
 		settings := cfg.Check(name)
 		if settings.Enabled {

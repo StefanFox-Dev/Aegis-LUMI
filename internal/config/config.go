@@ -58,7 +58,6 @@ func Default() Config {
 			"LoginSpoof_A":  {Enabled: true, Max: 6, Action: "none"},
 			"InputSpoof_A":  {Enabled: true, Max: 10, Action: "none"},
 			"FastThrow_A":   {Enabled: true, Max: 6, Action: "kick"},
-			"ItemDelay_A":   {Enabled: true, Max: 10, Action: "none"},
 			"AutoRefill_A":  {Enabled: true, Max: 8, Action: "none"},
 			"Macro_A":       {Enabled: true, Max: 8, Action: "none"},
 			"MLSpoof_A":     {Enabled: true, Max: 8, Action: "none"},

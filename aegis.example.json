@@ -23,7 +23,6 @@
 		"LoginSpoof_A": {"enabled": true, "max": 6, "action": "none"},
 		"InputSpoof_A": {"enabled": true, "max": 10, "action": "none"},
 		"FastThrow_A": {"enabled": true, "max": 6, "action": "kick"},
-		"ItemDelay_A": {"enabled": true, "max": 10, "action": "none"},
 		"AutoRefill_A": {"enabled": true, "max": 8, "action": "none"},
 		"Macro_A": {"enabled": true, "max": 8, "action": "none"},
 		"MLSpoof_A": {"enabled": true, "max": 8, "action": "none"}
